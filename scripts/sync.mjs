@@ -5,7 +5,7 @@ import {fetchSnapshot} from '../lib/biwenger.mjs';
 const key=Buffer.from(process.env.SNAPSHOT_KEY||'','hex');
 if(key.length!==32)throw Error('SNAPSHOT_KEY must be 32 bytes');
 const snapshot=await fetchSnapshot(process.env.BIWENGER_TOKEN);
-if(!snapshot.ownVerified||snapshot.intelligence?.available!==true)throw Error('Snapshot incomplete; preserving prior publication');
+if(!snapshot.ownVerified||snapshot.intelligence?.available!==true)throw Error('Snapshot incomplete: '+String(snapshot.intelligence?.reason||'unknown').split(':')[0]);
 const expected=Number(process.env.BW_EXPECTED_USERS);
 if(!Number.isSafeInteger(expected)||snapshot.rows.length!==expected)throw Error('Unexpected league size; preserving prior publication');
 
