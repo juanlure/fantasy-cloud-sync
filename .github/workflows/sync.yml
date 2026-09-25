@@ -1,0 +1,33 @@
+name: Refresh encrypted fantasy snapshot
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '7,22,37,52 * * * *'
+permissions:
+  contents: write
+concurrency:
+  group: fantasy-snapshot
+  cancel-in-progress: false
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Read Biwenger and encrypt results
+        env:
+          BIWENGER_TOKEN: ${{ secrets.BIWENGER_TOKEN }}
+          SNAPSHOT_KEY: ${{ secrets.SNAPSHOT_KEY }}
+          BW_LEAGUE_ID: ${{ secrets.BW_LEAGUE_ID }}
+          BW_USER_ID: ${{ secrets.BW_USER_ID }}
+          BW_EXPECTED_USERS: ${{ secrets.BW_EXPECTED_USERS }}
+        run: node scripts/sync.mjs
+      - name: Publish encrypted file
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add snapshot.enc
+          git commit -m 'Refresh encrypted snapshot'
+          git push
